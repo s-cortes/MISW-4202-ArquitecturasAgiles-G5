@@ -16,6 +16,15 @@ services:
     depends_on:
       - jwt-queries
 
+  products-queries:
+    volumes:
+      - ./bodegas/:/mnt/
+    build: ./bodegas
+    working_dir: /backend/
+    command: sh run_queries.sh
+    depends_on:
+      - jwt-queries
+
   nginx:
     image: nginx:latest
     ports:
