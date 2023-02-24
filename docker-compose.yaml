@@ -7,6 +7,16 @@ services:
     working_dir: /backend/
     command: sh run.sh
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+
   routes-queries:
     volumes:
       - ./rutas/:/mnt/
@@ -19,11 +29,39 @@ services:
   products-queries:
     volumes:
       - ./bodegas/:/mnt/
-    build: ./bodegas
+    build:
+      context: ./bodegas
+      dockerfile: api.Dockerfile
     working_dir: /backend/
-    command: sh run_queries.sh
+    command: sh api.sh
     depends_on:
       - jwt-queries
+
+  products-events:
+    volumes:
+      - ./bodegas/:/mnt/
+    build:
+      context: ./bodegas
+      dockerfile: events.Dockerfile
+    working_dir: /backend/
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: sh events.sh
+    depends_on:
+      - rabbitmq
+
+  voting-events:
+    volumes:
+      - ./votaciones/:/mnt/
+    build:
+      context: ./votaciones
+      dockerfile: events.Dockerfile
+    working_dir: /backend/
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: sh events.sh
+    depends_on:
+      - rabbitmq
 
   nginx:
     image: nginx:latest
