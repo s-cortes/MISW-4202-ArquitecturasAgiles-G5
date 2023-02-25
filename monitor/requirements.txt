@@ -1,0 +1,5 @@
+Flask
+schedule
+flask-marshmallow
+flask-jwt-extended
+pyopenssl
