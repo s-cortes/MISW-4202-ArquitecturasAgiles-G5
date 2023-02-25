@@ -111,10 +111,9 @@ services:
       context: ./votaciones
       dockerfile: events.Dockerfile
     working_dir: /backend/
-    environment:
-      - NUM_REQUESTS=5
     env_file:
       - events.env
+      - ./votaciones/requests.env
     command: sh run_requests.sh
     depends_on:
       - rabbitmq

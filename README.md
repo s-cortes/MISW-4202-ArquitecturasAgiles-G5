@@ -100,7 +100,7 @@ Este servicio expone las siguientes operaciones:
 
 #### Ejecución
 
-Para desplegar este servicio, se utiliza *docker-compose* para levantar los contenedores relacionados. Por otra parte, para la ejecución de ***experimentos de disponibilidad*** es necesario editar el archivo `docker-compose.yaml` para definir el número de requests a realizar (`services > voting-requests > environment > NUM_REQUESTS`).
+Para desplegar este servicio, se utiliza *docker-compose* para levantar los contenedores relacionados. Por otra parte, para la ejecución de ***experimentos de disponibilidad*** es necesario editar el archivo `./votaciones/requests.env` para definir el número y periodicidad de los requests a realizar.
 
 ```shell
 docker compose up -d voting-responses
