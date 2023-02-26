@@ -20,12 +20,16 @@ channel.queue_bind(
 )
 
 
-def query_product_quantity(ch, method, properties, body):
-    message = body.decode("utf-8")
-    print(f"{method.routing_key} Received: {message}")
+def query_product_response_consensus(ch, method, properties, body):
+    bodega, correlation, pindex, quantity, result = body.decode("utf-8").split(":")
+    print(f"VOTING_RES:{correlation}:{bodega}:{pindex}:{quantity}:{result}")
+    # TODO recibir la info de cada bodega
+    # TODO guardar la información de la bodega
+    # TODO si tenemos todas las respuestas, realizar el consenso
+    
 
 
 channel.basic_consume(
-    queue=queue_name, on_message_callback=query_product_quantity, auto_ack=True
+    queue=queue_name, on_message_callback=query_product_response_consensus, auto_ack=True
 )
 channel.start_consuming()

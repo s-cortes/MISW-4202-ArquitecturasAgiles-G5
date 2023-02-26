@@ -49,7 +49,12 @@ services:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
 
-  products-events:
+  redis:
+    image: redis
+    volumes: 
+      - ./data:/data
+
+  products-healthy-events:
     volumes:
       - ./bodegas/:/mnt/
     build:
@@ -57,8 +62,29 @@ services:
       dockerfile: events.Dockerfile
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 2
     working_dir: /backend/
+    environment:
+      - WORKER_TYPE=HEALTHY
+    env_file:
+      - events.env
+    command: sh events.sh
+    depends_on:
+      - rabbitmq
+
+  products-flaky-events:
+    volumes:
+      - ./bodegas/:/mnt/
+    build:
+      context: ./bodegas
+      dockerfile: events.Dockerfile
+    deploy:
+      mode: replicated
+      replicas: 1
+    working_dir: /backend/
+    environment:
+      - WORKER_TYPE=FLAKY
+      - FAILURE_PROBABILITY=75
     env_file:
       - events.env
     command: sh events.sh
@@ -87,8 +113,10 @@ services:
     working_dir: /backend/
     env_file:
       - events.env
+      - ./votaciones/requests.env
     command: sh run_requests.sh
     depends_on:
       - rabbitmq
-      - products-events
+      - products-healthy-events
+      - products-flaky-events
       - voting-responses
