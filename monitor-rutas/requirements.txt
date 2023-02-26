@@ -1,0 +1,6 @@
+Flask
+Flask-RESTful
+flask-jwt-extended
+pyopenssl
+timesched
+requests
