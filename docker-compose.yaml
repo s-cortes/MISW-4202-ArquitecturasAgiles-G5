@@ -7,16 +7,6 @@ services:
     working_dir: /backend/
     command: sh run.sh
 
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: 'rabbitmq'
-    ports:
-      - 5672:5672
-      - 15672:15672
-    volumes:
-      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
-
   routes-queries:
     volumes:
       - ./rutas/:/mnt/
@@ -37,31 +27,17 @@ services:
     depends_on:
       - jwt-queries
 
-  products-events:
+  monitor-rutas:
     volumes:
-      - ./bodegas/:/mnt/
-    build:
-      context: ./bodegas
-      dockerfile: events.Dockerfile
+      - ./monitor-rutas/:/mnt/
+      - ./monitor-rutas/output:/backend/output
+    build: ./monitor-rutas
     working_dir: /backend/
-    environment:
-      - PYTHONUNBUFFERED=1
-    command: sh events.sh
+    command: sh run.sh
+    env_file: 
+      - ./monitor-rutas/.env
     depends_on:
-      - rabbitmq
-
-  voting-events:
-    volumes:
-      - ./votaciones/:/mnt/
-    build:
-      context: ./votaciones
-      dockerfile: events.Dockerfile
-    working_dir: /backend/
-    environment:
-      - PYTHONUNBUFFERED=1
-    command: sh events.sh
-    depends_on:
-      - rabbitmq
+      - routes-queries
 
   nginx:
     image: nginx:latest
@@ -75,14 +51,87 @@ services:
       - jwt-queries
       - routes-queries
   
-  monitor-rutas:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
     volumes:
-      - ./monitor-rutas/:/mnt/
-      - ./monitor-rutas/output:/backend/output
-    build: ./monitor-rutas
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+
+  redis:
+    image: redis
+    volumes: 
+      - ./data:/data
+
+  products-healthy-events:
+    volumes:
+      - ./bodegas/:/mnt/
+      - ./bodegas/outputs:/backend/outputs
+    build:
+      context: ./bodegas
+      dockerfile: events.Dockerfile
+    deploy:
+      mode: replicated
+      replicas: 2
     working_dir: /backend/
-    command: sh run.sh
-    env_file: 
-      - ./monitor-rutas/.env
+    environment:
+      - WORKER_TYPE=HEALTHY
+    env_file:
+      - events.env
+    command: sh events.sh
     depends_on:
-      - routes-queries
+      - rabbitmq
+
+  products-flaky-events:
+    volumes:
+      - ./bodegas/:/mnt/
+      - ./bodegas/outputs:/backend/outputs
+    build:
+      context: ./bodegas
+      dockerfile: events.Dockerfile
+    deploy:
+      mode: replicated
+      replicas: 1
+    working_dir: /backend/
+    environment:
+      - WORKER_TYPE=FLAKY
+      - FAILURE_PROBABILITY=75
+    env_file:
+      - events.env
+    command: sh events.sh
+    depends_on:
+      - rabbitmq
+
+  voting-responses:
+    volumes:
+      - ./votaciones/:/mnt/
+    build:
+      context: ./votaciones
+      dockerfile: events.Dockerfile
+    working_dir: /backend/
+    env_file:
+      - events.env
+    command: sh run_responses.sh
+    depends_on:
+      - rabbitmq
+
+  voting-requests:
+    volumes:
+      - ./votaciones/:/mnt/
+      - ./votaciones/outputs:/backend/outputs
+    build:
+      context: ./votaciones
+      dockerfile: events.Dockerfile
+    working_dir: /backend/
+    env_file:
+      - events.env
+      - ./votaciones/requests.env
+    command: sh run_requests.sh
+    depends_on:
+      - rabbitmq
+      - products-healthy-events
+      - products-flaky-events
+      - voting-responses
