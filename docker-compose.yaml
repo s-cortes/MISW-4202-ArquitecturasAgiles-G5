@@ -78,6 +78,11 @@ services:
   monitor-rutas:
     volumes:
       - ./monitor-rutas/:/mnt/
+      - ./monitor-rutas/output:/backend/output
     build: ./monitor-rutas
     working_dir: /backend/
     command: sh run.sh
+    env_file: 
+      - ./monitor-rutas/.env
+    depends_on:
+      - routes-queries

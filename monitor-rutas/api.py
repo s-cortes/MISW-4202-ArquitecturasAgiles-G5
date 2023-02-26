@@ -8,7 +8,9 @@ import requests
 import hashlib
 import json
 import logging
+import os
 
+EXPERIMENTO_ID = os.environ.get("EXPERIMENTO_ID")
 logging.basicConfig(filename='record.log', level=logging.INFO)
 
 
@@ -21,7 +23,15 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
 jwt = JWTManager(app)
 api = Api(app)
 
+output_file_path = f"output/{EXPERIMENTO_ID}.csv"
+
+def write_to_output(message):
+    print(message)
+    with open(output_file_path, "a") as output_file:
+        output_file.write(f"{message}\n")
+
 s = timesched.Scheduler()
+write_to_output("time;response;expected;result")
 def callback(typ, arg):
     ds = str(datetime.now())[:19]
 
@@ -43,13 +53,9 @@ def callback(typ, arg):
     checksum = md5_response['checksum']
 
     data_md5 = hashlib.md5(json.dumps(body, sort_keys=True).encode('utf-8')).hexdigest()
-    logging.info(f'App rutas respondio  {datetime.now()}')
-  
-    if checksum != data_md5:
-        logging.info(f'App rutas fallo {datetime.now()}')
-    else:
-        logging.info(f'App rutas respondio correctamente {datetime.now()}')
 
+    write_to_output(f'{datetime.now()};{data_md5};{checksum};{"ok"if(checksum==data_md5) else "fail"}')
+    
     print(f'{ds} {typ} {arg}, active={s.count()}, response={response.text}, md5={data_md5}, md5={checksum}')
 
 
