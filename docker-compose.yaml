@@ -74,3 +74,10 @@ services:
     depends_on:
       - jwt-queries
       - routes-queries
+  
+  monitor-rutas:
+    volumes:
+      - ./monitor-rutas/:/mnt/
+    build: ./monitor-rutas
+    working_dir: /backend/
+    command: sh run.sh
