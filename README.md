@@ -35,7 +35,7 @@ docker compose up -d
 Esta rama (async-sec) muestra la comunicación entre servicios de manera asíncrona e implementa el patrón CQRS. Para la comunicación asíncrona, se hace uso de ***RabbitMQ*** como plataforma de mensajería. Para la seguridad se utiliza un certificado SSL para asegurar la comunicación entre los servicios. A continuación, se explica con mayor detalle cada uno de los servicios.
 
 
-#### Bodegas
+### Bodegas
 
 Al implemetar el patrón CQRS las operaciones que expone este servicio se implementan en dos partes: consultas (`api_queries.py`) y eventos/queries asíncronos (`event_queries.py`). En particular, se tienen las siguientes operaciones:
 
@@ -59,17 +59,26 @@ VOTING_ROUTING_REQUEST_KEY="vote_product_request"
 VOTING_ROUTING_RESPONSE_Q="product_response_queue"
 # Routing Key para el direccionamiento de mensajes
 VOTING_ROUTING_RESPONSE_KEY="vote_product_response"
+
+# identificador del experimento
+VOTING_EXPERIMENT_ID="example"
 ```
 
 #### Ejecución
 
-Para desplegar este servicio, se utiliza *docker-compose* para levantar los contenedores relacionados. Por otra parte, para la ejecución de ***experimentos de disponibilidad*** es necesario editar el archivo `docker-compose.yaml` para definir el número de répicas de contenedores "healthy" (funcionando correctamente, `services > products-healthy-events > deploy > replicas`) y contenedores "flaky" (inyección de fallas, `services > products-flaky-events > deploy > replicas`)
+Para desplegar este servicio, se utiliza *docker-compose* para levantar los contenedores relacionados. Por otra parte, para la ejecución de ***experimentos de disponibilidad*** es necesario realizar los cambios:
+* Editar el archivo `docker-compose.yaml` para definir el número de répicas de contenedores "healthy" (funcionando correctamente, `services > products-healthy-events > deploy > replicas`) y contenedores "flaky" (inyección de fallas, `services > products-flaky-events > deploy > replicas`), 
+* Editar el archivo `docker-compose.yaml` para definir la probabilidad de inyectar un error para el componente *products-flaky-events* (`services > products-flaky-events > environment > FAILURE_PROBABILITY`)
+* Editar la variable de entorno ***VOTING_EXPERIMENT_ID*** (`/events.env`) para la captura de resultados.
+
 
 ```shell
 docker compose up -d products-flaky-events
 docker compose up -d products-healthy-events
 ```
 
+#### Outputs
+Luego de ejecutar un experimento, cada instancia desplegada genera un archivo `.csv` con las operaciones realizadas. En la carpeta `./bodegas/outputs` se encuentra un ejemplo de ejecución del experimento.
 
 
 ### Votaciones
@@ -91,6 +100,9 @@ VOTING_ROUTING_REQUEST_KEY="vote_product_request"
 VOTING_ROUTING_RESPONSE_Q="product_response_queue"
 # Routing Key para el direccionamiento de mensajes
 VOTING_ROUTING_RESPONSE_KEY="vote_product_response"
+
+# identificador del experimento
+VOTING_EXPERIMENT_ID="example"
 ```
 
 Este servicio expone las siguientes operaciones:
@@ -100,12 +112,24 @@ Este servicio expone las siguientes operaciones:
 
 #### Ejecución
 
-Para desplegar este servicio, se utiliza *docker-compose* para levantar los contenedores relacionados. Por otra parte, para la ejecución de ***experimentos de disponibilidad*** es necesario editar el archivo `./votaciones/requests.env` para definir el número y periodicidad de los requests a realizar.
+Para desplegar este servicio, se utiliza *docker-compose* para levantar los contenedores relacionados. Por otra parte, para la ejecución de ***experimentos de disponibilidad*** es necesario editar el archivo `./votaciones/requests.env` para definir el número y periodicidad de los requests a realizar. Del mismo modo, se debe definir la variable de entorno ***VOTING_EXPERIMENT_ID*** (`/events.env`) para la captura de resultados.
 
 ```shell
 docker compose up -d voting-responses
 docker compose up -d voting-requests
 ```
+
+```shell
+# File ./votaciones/requests.env
+
+# Numero de requests a publicar
+NUM_REQUESTS=5
+# Intervalo de espera entre publicaciones
+REQUEST_INTERVAL=0.5
+```
+
+#### Outputs
+Luego de ejecutar un experimento, cada instancia desplegada genera un archivo `.csv` con las operaciones realizadas. En la carpeta `./votaciones/outputs` se encuentra un ejemplo de ejecución del experimento.
 
 
 
