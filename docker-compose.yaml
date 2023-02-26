@@ -10,9 +10,12 @@ services:
   routes-queries:
     volumes:
       - ./rutas/:/mnt/
+      - ./rutas/output:/backend/output
     build: ./rutas
     working_dir: /backend/
     command: sh run_queries.sh
+    env_file: 
+      - ./rutas/.env
     depends_on:
       - jwt-queries
 

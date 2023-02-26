@@ -11,6 +11,7 @@ import logging
 import os
 
 EXPERIMENTO_ID = os.environ.get("EXPERIMENTO_ID")
+TIME = os.environ.get("TIME")
 logging.basicConfig(filename='record.log', level=logging.INFO)
 
 
@@ -61,8 +62,9 @@ def callback(typ, arg):
 
 callback('started', 'now')
 
-minute = timedelta(minutes=0.5)
+minute = timedelta(minutes=0.5)# en minutos TIME = 0.5
 s.repeat(minute, 0, callback, 'repeat', minute)
+#s.repeat(TIME, 0, callback, TIME)
 s.run()
 
 if __name__ == '__main__':
