@@ -35,7 +35,7 @@ services:
     working_dir: /backend/
     command: sh run.sh
     env_file: 
-      - ./monitor-rutas/.env
+      - ./monitor-rutas/monitor.env
     depends_on:
       - routes-queries
 
