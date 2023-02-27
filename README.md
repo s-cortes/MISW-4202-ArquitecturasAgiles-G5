@@ -30,7 +30,7 @@ docker compose up -d
 ## Estructura del Repositorio
 
 
-## Descripción de los servicios
+## Descripción de los servicios táctica votación
 
 Esta rama (async-sec) muestra la comunicación entre servicios de manera asíncrona e implementa el patrón CQRS. Para la comunicación asíncrona, se hace uso de ***RabbitMQ*** como plataforma de mensajería. Para la seguridad se utiliza un certificado SSL para asegurar la comunicación entre los servicios. A continuación, se explica con mayor detalle cada uno de los servicios.
 
@@ -172,4 +172,18 @@ Se utiliza la imagen "alpine" de *RabbitMQ* para la implementación de la plataf
 Para desplegar este servicio, se utiliza *docker-compose* para levantar los contenedores relacionados.
 ```shell
 docker compose up -d rabbitmq
+```
+## Descripción de los servicios táctica monitor condicional
+
+### Rutas
+- **Consultar Disponibilidad Rutas** (`api_queries.py`): Esta operación se implementa en la función `RouteMonitoringResource` a través del método get.
+
+### Monitor Rutas
+- Mediante el uso de la libreria timesched.Scheduler se implmenta la función llamda callback la cual envia requests de manera recurrente hacia el componente rutas.
+
+#### Ejecución
+
+Para desplegar este servicio, se utiliza *docker-compose* para levantar los contenedores relacionados.
+```shell
+docker compose up monitor-rutas
 ```
