@@ -16,14 +16,14 @@ channel = connection.channel()
 
 channel.exchange_declare(exchange=EXCHANGE_NAME, exchange_type="direct")
 
-output_file = open(f"outputs/{VOTING_EXPERIMENT_ID}.csv", "w")
+output_file = open(f"outputs/{VOTING_EXPERIMENT_ID}_request.csv", "w")
 output_file.write("COMPONENT;CORRELATION_ID;PRODUCT_ID;QUANTITY\n")
 
 def publish_product_request(*args, **kwargs):
     corerlation = kwargs.get("count", 0)
     product, quantity = randint(0, 4), randint(0, 100)
 
-    message = f"{corerlation};{product};{quantity}"
+    message = f"correlation{corerlation};{product};{quantity}"
     channel.basic_publish(
         exchange=EXCHANGE_NAME, routing_key=ROUTING_KEY_NAME, body=message
     )

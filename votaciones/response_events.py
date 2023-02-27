@@ -11,9 +11,9 @@ VOTING_EXPERIMENT_ID = os.environ.get("VOTING_EXPERIMENT_ID")
 
 print(f"Starting Subscription to {EXCHANGE_NAME}/{RESPONSE_KEY_NAME}/{RESPONSE_QUEUE_NAME}")
 
-output_file_path = f"outputs/{VOTING_EXPERIMENT_ID}.csv"
+output_file_path = f"outputs/{VOTING_EXPERIMENT_ID}_response.csv"
 
-r = redis.Redis(host='redis', port=6379, db=0)
+r = redis.StrictRedis('redis', 6379, charset="utf-8", decode_responses=True)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host="rabbitmq"))
 channel = connection.channel()
@@ -32,7 +32,7 @@ def write_to_output(message):
     with open(output_file_path, "a") as output_file:
         output_file.write(f"{message}\n")
 
-write_to_output("COMPONENT;CORRELATION_ID;PRODUCT_ID;QUANTITY;RESULTS;FINAL_VOTE\n")
+write_to_output("COMPONENT;CORRELATION_ID;PRODUCT_ID;QUANTITY;RESULTS;FINAL_VOTE")
 
 def query_product_response_consensus(ch, method, properties, body):
     bodega, correlation, pindex, quantity, result = body.decode("utf-8").split(";")
@@ -42,7 +42,8 @@ def query_product_response_consensus(ch, method, properties, body):
     if r.exists(correlation):
         info_bodegas = r.hgetall(correlation)
     info_bodegas[bodega] = result
-    
+    r.hmset(correlation, info_bodegas)
+
     if len(info_bodegas) == NUM_REPLICAS:
         num_positives = 0
         results = ""
@@ -51,8 +52,7 @@ def query_product_response_consensus(ch, method, properties, body):
             if result == "Y":
                 num_positives += 1
         final_vote = "Y" if num_positives > NUM_REPLICAS / 2 else "N"
-
-        write_to_output(f"VOTING_RES;{correlation};{pindex};{quantity};{results};{final_vote}\n")
+        write_to_output(f"VOTING_RES;{correlation};{pindex};{quantity};{results};{final_vote}")
 
 
 channel.basic_consume(
