@@ -108,6 +108,7 @@ services:
   voting-responses:
     volumes:
       - ./votaciones/:/mnt/
+      - ./votaciones/outputs:/backend/outputs
     build:
       context: ./votaciones
       dockerfile: events.Dockerfile
@@ -117,6 +118,7 @@ services:
     command: sh run_responses.sh
     depends_on:
       - rabbitmq
+      - redis
 
   voting-requests:
     volumes:
