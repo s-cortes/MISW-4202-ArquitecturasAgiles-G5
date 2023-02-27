@@ -38,11 +38,12 @@ def query_product_response_consensus(ch, method, properties, body):
     bodega, correlation, pindex, quantity, result = body.decode("utf-8").split(";")
     print(f"VOTING_RES;{correlation};{bodega};{pindex};{quantity};{result}")
 
+    redis_id = f"{VOTING_EXPERIMENT_ID}-{correlation}"
     info_bodegas = {} 
-    if r.exists(correlation):
-        info_bodegas = r.hgetall(correlation)
+    if r.exists(redis_id):
+        info_bodegas = r.hgetall(redis_id)
     info_bodegas[bodega] = result
-    r.hmset(correlation, info_bodegas)
+    r.hmset(redis_id, info_bodegas)
 
     if len(info_bodegas) == NUM_REPLICAS:
         num_positives = 0
