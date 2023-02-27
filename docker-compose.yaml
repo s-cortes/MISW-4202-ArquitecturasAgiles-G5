@@ -35,7 +35,7 @@ services:
     working_dir: /backend/
     command: sh run.sh
     env_file: 
-      - ./monitor-rutas/.env
+      - ./monitor-rutas/monitor.env
     depends_on:
       - routes-queries
 
@@ -108,6 +108,7 @@ services:
   voting-responses:
     volumes:
       - ./votaciones/:/mnt/
+      - ./votaciones/outputs:/backend/outputs
     build:
       context: ./votaciones
       dockerfile: events.Dockerfile
@@ -117,6 +118,7 @@ services:
     command: sh run_responses.sh
     depends_on:
       - rabbitmq
+      - redis
 
   voting-requests:
     volumes:
