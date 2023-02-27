@@ -62,7 +62,7 @@ def callback(typ, arg):
 
 callback('started', 'now')
 
-minute = timedelta(minutes=0.5)# en minutos TIME = 0.5
+minute = timedelta(minutes=0.83)# en minutos TIME = 0.5
 s.repeat(minute, 0, callback, 'repeat', minute)
 #s.repeat(TIME, 0, callback, TIME)
 s.run()
