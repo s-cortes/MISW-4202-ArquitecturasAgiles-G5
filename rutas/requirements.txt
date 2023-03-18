@@ -3,3 +3,4 @@ flask-marshmallow
 Flask-RESTful
 flask-jwt-extended
 pyopenssl
+pika

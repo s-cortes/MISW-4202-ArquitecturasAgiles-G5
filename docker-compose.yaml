@@ -12,6 +12,8 @@ services:
       - ./rutas/:/mnt/
     build: ./rutas
     working_dir: /backend/
+    env_file:
+      - events.env
     command: sh run_queries.sh
     depends_on:
       - jwt-queries
@@ -27,18 +29,6 @@ services:
     depends_on:
       - jwt-queries
 
-  monitor-rutas:
-    volumes:
-      - ./monitor-rutas/:/mnt/
-      - ./monitor-rutas/output:/backend/output
-    build: ./monitor-rutas
-    working_dir: /backend/
-    command: sh run.sh
-    env_file: 
-      - ./monitor-rutas/monitor.env
-    depends_on:
-      - routes-queries
-
   nginx:
     image: nginx:latest
     ports:
@@ -50,6 +40,7 @@ services:
     depends_on:
       - jwt-queries
       - routes-queries
+      - products-queries
   
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -104,36 +95,3 @@ services:
     command: sh events.sh
     depends_on:
       - rabbitmq
-
-  voting-responses:
-    volumes:
-      - ./votaciones/:/mnt/
-      - ./votaciones/outputs:/backend/outputs
-    build:
-      context: ./votaciones
-      dockerfile: events.Dockerfile
-    working_dir: /backend/
-    env_file:
-      - events.env
-    command: sh run_responses.sh
-    depends_on:
-      - rabbitmq
-      - redis
-
-  voting-requests:
-    volumes:
-      - ./votaciones/:/mnt/
-      - ./votaciones/outputs:/backend/outputs
-    build:
-      context: ./votaciones
-      dockerfile: events.Dockerfile
-    working_dir: /backend/
-    env_file:
-      - events.env
-      - ./votaciones/requests.env
-    command: sh run_requests.sh
-    depends_on:
-      - rabbitmq
-      - products-healthy-events
-      - products-flaky-events
-      - voting-responses
