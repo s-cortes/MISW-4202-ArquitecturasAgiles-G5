@@ -9,10 +9,19 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
 jwt = JWTManager(app)
 api = Api(app)
 
+ROLES = {
+    'admin': 'admin',
+    'bodega': 'bodega',
+    'ruta': 'ruta'
+}
 class AuthResource(Resource):
     def get(self):
-        access_token = create_access_token(identity="test")
-        return jsonify(access_token=access_token)
+        payload = request.json
+        identity = "test"
+        if payload and payload.get("user", None):
+            identity = payload.get("user")
+            access_token = create_access_token(identity=identity)
+            return jsonify(access_token=access_token)
 
 
 api.add_resource(AuthResource, '/api-queries/jwt')
