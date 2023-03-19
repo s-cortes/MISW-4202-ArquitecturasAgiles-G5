@@ -5,15 +5,21 @@ services:
       - ./jwt/:/mnt/
     build: ./jwt
     working_dir: /backend/
+    env_file:
+      - identities.env
     command: sh run.sh
 
   routes-queries:
     volumes:
       - ./rutas/:/mnt/
+      - ./rutas/outputs:/backend/outputs
     build: ./rutas
     working_dir: /backend/
+    environment:
+      - WORKER_TYPE=FLAKY
     env_file:
       - events.env
+      - identities.env
     command: sh run_queries.sh
     depends_on:
       - jwt-queries
@@ -25,6 +31,8 @@ services:
       context: ./bodegas
       dockerfile: api.Dockerfile
     working_dir: /backend/
+    env_file:
+      - identities.env
     command: sh api.sh
     depends_on:
       - jwt-queries
@@ -52,12 +60,7 @@ services:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
 
-  redis:
-    image: redis
-    volumes: 
-      - ./data:/data
-
-  products-healthy-events:
+  products-events:
     volumes:
       - ./bodegas/:/mnt/
       - ./bodegas/outputs:/backend/outputs
@@ -66,32 +69,10 @@ services:
       dockerfile: events.Dockerfile
     deploy:
       mode: replicated
-      replicas: 2
     working_dir: /backend/
-    environment:
-      - WORKER_TYPE=HEALTHY
     env_file:
       - events.env
-    command: sh events.sh
-    depends_on:
-      - rabbitmq
-
-  products-flaky-events:
-    volumes:
-      - ./bodegas/:/mnt/
-      - ./bodegas/outputs:/backend/outputs
-    build:
-      context: ./bodegas
-      dockerfile: events.Dockerfile
-    deploy:
-      mode: replicated
-      replicas: 1
-    working_dir: /backend/
-    environment:
-      - WORKER_TYPE=FLAKY
-      - FAILURE_PROBABILITY=75
-    env_file:
-      - events.env
+      - identities.env
     command: sh events.sh
     depends_on:
       - rabbitmq

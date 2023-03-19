@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
 from flask_jwt_extended import create_access_token
@@ -9,19 +10,31 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
 jwt = JWTManager(app)
 api = Api(app)
 
-ROLES = {
-    'admin': 'admin',
-    'bodega': 'bodega',
-    'ruta': 'ruta'
+ID_ADMIN = os.environ.get("ID_ADMIN")
+ID_BODEGA = os.environ.get("ID_BODEGA")
+ID_RUTA = os.environ.get("ID_RUTA")
+ID_TRANSPORTE = os.environ.get("ID_TRANSPORTE")
+
+ROLES = { # key-value -> usuario: rol
+    ID_ADMIN: 'admin',
+    ID_BODEGA: 'bodega',
+    ID_RUTA: 'ruta',
+    ID_TRANSPORTE: 'transporte'
 }
+
 class AuthResource(Resource):
-    def get(self):
-        payload = request.json
-        identity = "test"
-        if payload and payload.get("user", None):
-            identity = payload.get("user")
-            access_token = create_access_token(identity=identity)
+    def post(self):
+        payload, rol = request.json, "test"
+        user, password = None, None
+        if payload:
+            user = payload.get("user", None)
+            password = payload.get("password", None)
+        if user and password and user==password and user in ROLES:
+            rol = ROLES[user]
+            access_token = create_access_token(identity=rol)
             return jsonify(access_token=access_token)
+        else:
+            return {'msg': 'Invalid user and/or password'}, 401
 
 
 api.add_resource(AuthResource, '/api-queries/jwt')
