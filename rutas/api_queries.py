@@ -4,7 +4,7 @@ from base import app, api, Resource, Flask, request
 from base import EXPERIMENT_ID, IDENTITY, IDENTITY_TOKEN, IDENTITY_ROL
 from base import publish_storage_plan, working_correctly, write_to_output
 from flask_jwt_extended import jwt_required, get_jwt_identity
-import random
+from random import randint, random
 
 
 class RouteResource(Resource):
@@ -31,7 +31,11 @@ class RouteResource(Resource):
             checksum = hashlib.md5(message.encode("utf-8")).hexdigest()
 
             if not is_healthy:
-                payload["rol"] = IDENTITY
+                r = random()
+                if r <= 0.5:
+                    payload["rol"] = IDENTITY
+                else:
+                    payload["warehouse"] = randint(10, 100)
                 message = json.dumps(payload, sort_keys=True)
 
             write_to_output(f"ROUTE;{EXPERIMENT_ID};200;{state};{message};{checksum}")

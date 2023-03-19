@@ -38,20 +38,19 @@ def set_storage_plan(ch, method, properties, body):
     message, checksum = body.decode("utf-8").split(";")
     payload = json.loads(message)
     validation = hashlib.md5(json.dumps(payload, sort_keys=True).encode('utf-8')).hexdigest()
-    resp = 200
+    resp, rol = 200, payload.get("rol", None)
 
-    if payload.get("rol", None) != 'ruta':
+    if rol != 'ruta':
         resp = 403
-    elif checksum == validation:
+    elif checksum != validation:
         resp = 400
-        
 
     write_to_output(
-        f"BODEGA;{REPLICA_ID};{EXPERIMENT_ID};{resp};{checksum}:{validation};{message}"
+        f"BODEGA;{REPLICA_ID};{EXPERIMENT_ID};{resp};{rol};{checksum}:{validation};{message}"
     )
 
 
-write_to_output("COMPONENT;REPLICA_ID;CORRELATION_ID;RESPONSE;CHECKSUM;VALIDATION;MESSAGE")
+write_to_output("COMPONENT;REPLICA_ID;CORRELATION_ID;RESPONSE;ROLE;CHECKSUM;VALIDATION;MESSAGE")
 
 channel.basic_consume(
     queue=queue_name, on_message_callback=set_storage_plan, auto_ack=True
