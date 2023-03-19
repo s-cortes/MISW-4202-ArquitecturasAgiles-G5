@@ -20,15 +20,12 @@
 					}
 				}
 			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
-				"method": "GET",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"user\": \"admin\"\n}",
+					"raw": "{\n    \"user\": \"ID_ADMIN\",\n    \"password\": \"ID_ADMIN\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -36,18 +33,12 @@
 					}
 				},
 				"url": {
-					"raw": "https://0.0.0.0:8000/api-queries/jwt",
-					"protocol": "https",
+					"raw": "{{baseUrl}}/{{jwtUrl}}",
 					"host": [
-						"0",
-						"0",
-						"0",
-						"0"
+						"{{baseUrl}}"
 					],
-					"port": "8000",
 					"path": [
-						"api-queries",
-						"jwt"
+						"{{jwtUrl}}"
 					]
 				}
 			},
