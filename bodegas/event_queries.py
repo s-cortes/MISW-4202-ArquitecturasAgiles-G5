@@ -37,6 +37,7 @@ def write_to_output(message):
 def set_storage_plan(ch, method, properties, body):
     message, checksum = body.decode("utf-8").split(";")
     payload = json.loads(message)
+    validation = hashlib.md5(json.dumps(payload, sort_keys=True).encode('utf-8')).hexdigest()
     resp = 200
 
     if payload.get("rol", None) != 'ruta':
@@ -44,7 +45,6 @@ def set_storage_plan(ch, method, properties, body):
     elif checksum == validation:
         resp = 400
         
-    validation = hashlib.md5(json.dumps(payload, sort_keys=True).encode('utf-8')).hexdigest()
 
     write_to_output(
         f"BODEGA;{REPLICA_ID};{EXPERIMENT_ID};{resp};{checksum}:{validation};{message}"

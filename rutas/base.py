@@ -42,7 +42,7 @@ response = requests.post(
     json={"user": IDENTITY, "password": IDENTITY},
     verify=False
 )
-token = response.json()
+response = response.json()
 IDENTITY_TOKEN = response["access_token"]
 IDENTITY_ROL = response["rol"]
 

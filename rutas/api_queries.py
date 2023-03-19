@@ -25,7 +25,7 @@ class RouteResource(Resource):
         if current_user == "admin":
             is_healthy = working_correctly()
             state = "HEALTHY" if is_healthy else "FLAKY"
-            payload["rol"] = IDENTITY_TOKEN
+            payload["rol"] = IDENTITY_ROL
 
             message = json.dumps(payload, sort_keys=True)
             checksum = hashlib.md5(message.encode("utf-8")).hexdigest()
