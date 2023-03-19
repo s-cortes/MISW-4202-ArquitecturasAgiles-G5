@@ -23,6 +23,7 @@ services:
     command: sh run_queries.sh
     depends_on:
       - jwt-queries
+      - rabbitmq
 
   products-queries:
     volumes:
@@ -49,6 +50,7 @@ services:
       - jwt-queries
       - routes-queries
       - products-queries
+      - transport-commands
   
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -76,3 +78,12 @@ services:
     command: sh events.sh
     depends_on:
       - rabbitmq
+
+  transport-commands:
+    volumes:
+      - ./gestor-transporte/:/mnt/
+    build: ./gestor-transporte
+    working_dir: /backend/
+    command: sh run_commands.sh
+    depends_on:
+      - jwt-queries

@@ -15,3 +15,5 @@ ROUTE;exp_1;200;HEALTHY;b'{"city": "bogota", "role": "admin", "warehouse": 1}';9
 ROUTE;exp_1;200;HEALTHY;b'{"city": "bogota", "role": "admin", "warehouse": 1}';91a82fd3d5ab7f765ba41dd5baab49f2
 ROUTE;exp_1;200;HEALTHY;b'{"city": "bogota", "role": "admin", "warehouse": 1}';91a82fd3d5ab7f765ba41dd5baab49f2
 ROUTE;exp_1;200;HEALTHY;b'{"city": "bogota", "role": "admin", "warehouse": 1}';91a82fd3d5ab7f765ba41dd5baab49f2
+COMPONENT;CORRELATION_ID;RESPONSE;STATE_TYPE;BODY;CHECKSUM
+COMPONENT;CORRELATION_ID;RESPONSE;STATE_TYPE;BODY;CHECKSUM
