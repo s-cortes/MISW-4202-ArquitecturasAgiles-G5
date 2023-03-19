@@ -1,6 +1,8 @@
 import hashlib
 import json
-from base import app, api, Resource, Flask, request, publish_storage_plan
+from base import app, api, Resource, Flask, request
+from base import EXPERIMENT_ID
+from base import publish_storage_plan, working_correctly, write_to_output
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import random
 
@@ -18,19 +20,26 @@ class RouteResource(Resource):
     
     @jwt_required()
     def post(self):
-        current_user = get_jwt_identity()
+        payload, current_user = request.json, get_jwt_identity()
+
         if current_user == 'admin':
-            message = json.dumps(request.json, sort_keys=True).encode('utf-8')
+            is_healthy = working_correctly()
+            state = "HEALTHY" if is_healthy else "FLAKY"
+            payload["role"] = current_user if is_healthy else ""
+
+            message = json.dumps(payload, sort_keys=True).encode('utf-8')
             checksum = hashlib.md5(message).hexdigest()
-            
-            publish_storage_plan(message, checksum)
+
+            write_to_output(f"ROUTE;{EXPERIMENT_ID};200;{state};{message};{checksum}")
+            publish_storage_plan(f"{message};{checksum}")
+
             return {"msg": "successful Processing"}, 200
         else:
+            write_to_output(f"ROUTE;{EXPERIMENT_ID};403;;;")
             return {"msg": "Unauthorized"}, 403
 
 
 api.add_resource(RouteResource, '/api-queries/routes')
-
 
 
 if __name__ == '__main__':
