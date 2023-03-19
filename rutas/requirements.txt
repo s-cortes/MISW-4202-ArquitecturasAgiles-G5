@@ -4,3 +4,4 @@ Flask-RESTful
 flask-jwt-extended
 pyopenssl
 pika
+requests

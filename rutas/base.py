@@ -4,6 +4,7 @@ from flask import Flask, request
 from flask_restful import Api, Resource
 from flask_jwt_extended import JWTManager
 from random import randint
+import requests
 
 EXCHANGE_NAME = os.environ.get("STORAGE_PLAN_EXCHANGE_NAME")
 ROUTING_KEY_NAME = os.environ.get("STORAGE_PLAN_ROUTING_REQUEST_KEY")
@@ -12,6 +13,7 @@ WORKER_TYPE = os.environ.get("WORKER_TYPE", "HEALTHY")
 HEALTHY_WORKER = WORKER_TYPE == "HEALTHY"
 SUCCESS_PROBABILITY = int(os.environ.get("SUCCESS_PROBABILITY", "75"))
 
+IDENTITY = os.environ.get("ID_RUTA")
 EXPERIMENT_ID = os.environ.get("EXPERIMENT_ID")
 output_file_path = f"outputs/{EXPERIMENT_ID}.csv"
 
@@ -33,6 +35,17 @@ def write_to_output(message):
     print(message)
     with open(output_file_path, "a") as output_file:
         output_file.write(f"{message}\n")
+
+
+response = requests.post(
+    "https://jwt-queries:5000/api-queries/jwt",
+    json={"user": IDENTITY, "password": IDENTITY},
+    verify=False
+)
+token = response.json()
+IDENTITY_TOKEN = response["access_token"]
+IDENTITY_ROL = response["rol"]
+
 
 app = Flask(__name__)
 
