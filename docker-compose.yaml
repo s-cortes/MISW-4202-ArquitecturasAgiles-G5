@@ -82,6 +82,7 @@ services:
   transport-commands:
     volumes:
       - ./gestor-transporte/:/mnt/
+      - ./gestor-transporte/outputs:/backend/outputs
     build: ./gestor-transporte
     working_dir: /backend/
     command: sh run_commands.sh
