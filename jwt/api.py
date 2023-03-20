@@ -15,11 +15,11 @@ ID_BODEGA = os.environ.get("ID_BODEGA")
 ID_RUTA = os.environ.get("ID_RUTA")
 ID_TRANSPORTE = os.environ.get("ID_TRANSPORTE")
 
-ROLES = { # key-value -> usuario: rol
-    ID_ADMIN: 'admin',
-    ID_BODEGA: 'bodega',
-    ID_RUTA: 'ruta',
-    ID_TRANSPORTE: 'transporte'
+ROLES = {
+    ID_ADMIN: "admin",
+    ID_BODEGA: "bodega",
+    ID_RUTA: "ruta",
+    ID_TRANSPORTE: "transporte"
 }
 
 class AuthResource(Resource):
@@ -30,14 +30,13 @@ class AuthResource(Resource):
             user = payload.get("user", None)
             password = payload.get("password", None)
         if user and password and user==password and user in ROLES:
-            rol = ROLES[user]
+            rol = ROLES.get(user, "test")
             access_token = create_access_token(identity=rol)
-            return jsonify(access_token=access_token)
+            return jsonify(access_token=access_token, rol=rol)
         else:
-            return {'msg': 'Invalid user and/or password'}, 401
+            return {"msg": "Invalid user and/or password"}, 401
 
+api.add_resource(AuthResource, "/api-queries/jwt")
 
-api.add_resource(AuthResource, '/api-queries/jwt')
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', ssl_context='adhoc')
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", ssl_context="adhoc")

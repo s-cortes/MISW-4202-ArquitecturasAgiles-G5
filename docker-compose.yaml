@@ -23,6 +23,7 @@ services:
     command: sh run_queries.sh
     depends_on:
       - jwt-queries
+      - rabbitmq
 
   products-queries:
     volumes:
