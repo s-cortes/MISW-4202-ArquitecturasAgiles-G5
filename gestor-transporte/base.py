@@ -4,16 +4,12 @@ from flask_jwt_extended import JWTManager
 import os
 
 EXPERIMENT_ID = os.environ.get("EXPERIMENT_ID")
-COUNT_VEHICLES = os.environ.get("COUNT_VEHICLES")
 output_file_path = f"outputs/{EXPERIMENT_ID}.csv"
 
 def write_to_output(message):
     print(message)
     with open(output_file_path, "a") as output_file:
         output_file.write(f"{message}\n")
-
-def update_status_transport(message):
-    return (message > (COUNT_VEHICLES / 2))
 
 app = Flask(__name__)
 

@@ -1,11 +1,9 @@
 import hashlib
 import json
 from base import EXPERIMENT_ID
-from base import COUNT_VEHICLES
-from base import write_to_output, update_status_transport
+from base import write_to_output
 from base import app, api, Resource, Flask, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-import random
 
 
 class TransportResource(Resource):
