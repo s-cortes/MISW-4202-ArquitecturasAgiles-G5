@@ -85,6 +85,9 @@ services:
       - ./gestor-transporte/outputs:/backend/outputs
     build: ./gestor-transporte
     working_dir: /backend/
+    env_file:
+      - events.env
+      - identities.env
     command: sh run_commands.sh
     depends_on:
       - jwt-queries
